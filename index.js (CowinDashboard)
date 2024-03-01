@@ -1,0 +1,97 @@
+// Write your code here
+import {Component} from 'react'
+import VaccinationCoverage from '../VaccinationCoverage'
+import VaccinationByAge from '../VaccinationByAge'
+import VaccinationByGender from '../VaccinationByGender'
+import Loader from 'react-loader-spinner'
+
+const ApiStatusConstant = {
+  succes: 'SUCCESS',
+  failure: 'FAILURE',
+  loading: 'LOADING',
+}
+import './index.css'
+
+class CowinDashboard extends Component {
+  state = {vaccinationdeatails: {}, apiStatus: ApiStatusConstant.loading}
+
+  componentDidMount() {
+    this.getVaccinationDetails()
+  }
+  getVaccinationDetails = async () => {
+    const url = 'https://apis.ccbp.in/covid-vaccination-data'
+    const response = await fetch(url)
+    const data = await response.json()
+    if (response.ok === true) {
+      this.setState({
+        vaccinationdeatails: data,
+        apiStatus: ApiStatusConstant.succes,
+      })
+    } else if (response.status === 401) {
+      this.setState({apiStatus: ApiStatusConstant.failure})
+    }
+  }
+  renderSucces = () => {
+    const {vaccinationdeatails, apiStatus} = this.state
+    return (
+      <div>
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/cowin-logo.png"
+          alt="website logo"
+        />
+        <p>Co-Win</p>
+        <h1>Cowin vaccination in India</h1>
+        <VaccinationCoverage vaccinationdeatails={vaccinationdeatails} />
+        <VaccinationByGender vaccinationdeatails={vaccinationdeatails} />
+        <VaccinationByAge vaccinationdeatails={vaccinationdeatails} />
+        
+      </div>
+    )
+  }
+  renderLoading = () => {
+    return (
+      <div data-testid="loader">
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/cowin-logo.png"
+          alt="website logo"
+        />
+        <p>Co-Win</p>
+        <h1>Cowin vaccination in India</h1>
+        <Loader type="ThreeDots" color="#2d87bb" height={80} width={80} />
+      </div>
+    )
+  }
+
+  renderFailure = () => {
+    return (
+      <div>
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/cowin-logo.png"
+          alt="website logo"
+        />
+        <p>Co-Win</p>
+        <h1>Cowin vaccination in India</h1>
+        <h1>Something went wrong</h1>
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/api-failure-view.png"
+          alt="failure view"
+        />
+      </div>
+    )
+  }
+
+  render() {
+    const {vaccinationdeatails, apiStatus} = this.state
+
+    switch (apiStatus) {
+      case ApiStatusConstant.succes:
+        return this.renderSucces()
+      case ApiStatusConstant.loading:
+        return this.renderLoading()
+      case ApiStatusConstant.failure:
+        return this.renderFailure()
+    }
+  }
+}
+
+export default CowinDashboard
